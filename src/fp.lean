@@ -5,15 +5,17 @@ import init.function
 
 open function
 
-
-@[inline, reducible]
 def splitAt {a : Type} : ℕ → (list a) → (list a × list a) 
- |                  0 xs  := ([], xs)
+ |                   0 xs := ([], xs)
  |                   _ [] := ([], [])
- | (nat.succ n) (x :: xs) := let (ys,zs) := splitAt n xs in (x :: ys, zs)
+ | (nat.succ n) (x :: xs) := 
+       match splitAt n xs with 
+        (ys, zs) := (x :: ys, zs) 
+       end
 
 #reduce splitAt 2 [1,2,3,4]
 
+#print prefix splitAt
 
 example : splitAt 2 [1,2,3,4] = ([1,2],[3,4]) := 
 begin
@@ -23,12 +25,23 @@ begin
  rw splitAt._match_1,
  rw splitAt._match_1,
 end
+
   
 example (a : Type) (n : ℕ) (xs : list a) : 
  (λ x, (prod.fst x) ++ (prod.snd x) == xs) (splitAt n xs) :=
 begin
  induction xs with d hd,
- sorry 
+ cases n, 
+ rw splitAt, simp,
+ rw splitAt, simp,
+ cases n, 
+ rw splitAt, unfold prod.fst, unfold prod.snd, simp,
+ rw splitAt, simp, 
+ induction hd with a b,
+ cases n,
+ rw [splitAt, splitAt._match_1], simp,
+ rw [splitAt, splitAt._match_1], simp, 
+ sorry
 end
 
 
