@@ -4,15 +4,37 @@ import data.real.basic
 import init.function
 open function
 
--- def exp (a : Type) (x : a) (n : ℕ) : a := x * (exp x (n - 1))
 
--- def exp1 {a : Type} [has_mul a] : a → ℕ → a  
---  | x 0            := 1
---  | x (nat.succ n) := x * exp1 x n
+-- constant mynat : Type (versus)
+
+inductive mynat : Type
+ | z : mynat 
+ | s : mynat → mynat
+
+#check mynat.s $ mynat.s mynat.z
+
+
+/--
+def exp1 (a : Type) (x : a) (n : ℕ) : a := x * (exp x (n - 1))
+
+def exp2 {a : Type} [has_mul a] : a → ℕ → a  
+ | x 0            := 1
+ | x (nat.succ n) := x * exp1 x n
+--/
 
 def exp : ℕ → ℕ → ℕ   
  | x 0            := 1
  | x (nat.succ n) := x * exp x n
+
+
+-- #print prefix exp
+
+-- Exercicio A
+-- https://leanprover-community.github.io/mathematics_in_lean/basics.html
+example (x y z : ℕ) : (x + y) * z = (x * z) + (y * z) :=
+begin
+ ring,
+end
 
 
 example {x m n : ℕ} : exp x (m + n) = exp x m * exp x n := 
@@ -58,6 +80,11 @@ def foldr {a b: Type} : (a → b → b) → b → list a → b
 | f e [] := e
 | f e (x :: xs) := f x (foldr f e xs)
 
+def foldl {a b: Type} : (b → a → b) → b → list a → b 
+| f e [] := e
+| f e (x :: xs) := foldl f (f e x) xs
+
+
 #reduce foldr (λ x y, x + y) 0 [1,2,3]
 #reduce map (λ x : ℕ, x + 1) [1,2,3]
 #reduce reverse [1,2,3]
@@ -85,6 +112,8 @@ end
 
 #print list.cons_append
 
+
+-- Exercicio B
 
 lemma rev_aux {a : Type } (x : a) (ys : list a) : reverse (ys ++ [x]) = x :: reverse ys :=
 begin
@@ -123,4 +152,18 @@ begin
  rw hi, 
  unfold id, -- or simp
 end
- 
+
+
+-- Exercicio C 
+
+example {a b : Type} (f : a → b) [inhabited a] [inhabited b] : 
+  list.head ∘ map f = f ∘ list.head :=
+begin
+ unfold comp,
+ funext, 
+ induction x with b bs hi, 
+ rw list.head,
+ rw map, rw list.head,
+ sorry -- aparece que nao podemos provar sem saber mais sobre F
+end
+
