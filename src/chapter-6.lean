@@ -167,3 +167,73 @@ begin
  sorry -- aparece que nao podemos provar sem saber mais sobre F
 end
 
+-- Exercicio F
+
+lemma foldr_atom_flip {a : Type} (f : a → a → a) (e : a) (x : a) : foldr (flip f) e [x] = f e x :=
+begin
+ rw foldr,
+ rw foldr,
+ rw flip
+end
+
+lemma foldr_atom {a : Type} (f : a → a → a) (e : a) (x : a) : foldr f e [x] = f x e :=
+begin
+ rw foldr,
+ rw foldr
+end
+
+lemma foldr_open_tail {a : Type} (f : a → a → a) (e : a) (x : a) (xs : list a): foldr f e (xs ++ [x]) = foldr f (f x e) xs :=
+begin
+ induction xs with y ys hs,
+ simp,
+ rw foldr_atom,
+ rw foldr,
+ 
+ rw foldr,
+ rw← hs,
+ refl
+end
+
+lemma flip_ {a : Type} (x : a) (e : a) (f: a → a → a): flip f x e = f e x := 
+by refl
+
+theorem rev_foldl_foldr1 {a : Type} (f : a → a → a) (e : a) (xs : list a) : foldl f e xs = foldr (flip f) e (reverse xs) :=
+begin
+ induction xs with x xs hs,
+ 
+ rw foldl,
+ rw reverse, 
+ rw foldr,
+
+ rw foldl, 
+ rw reverse,
+ rw foldr_open_tail,
+ rw flip_,
+ sorry
+end
+
+theorem foldeq {a : Type} (f g : a → a → a) (e : a) (xs : list a) : (∀ x y z, g (f x y) z = f x (g y z)) → (∀ x, g e x = f x e) → foldl g e xs = foldr f e xs :=
+begin 
+ intro h1,
+ intro h2,
+ induction xs with x xs hs,
+
+ refl,
+ 
+ rw foldl,
+ rw h2 x,
+ rw foldr,
+ rw← hs,
+
+--    using the book:
+ induction xs with y ys hs2,
+ rw foldl,
+ rw foldl,
+ 
+ rw foldl,
+ rw h1,
+ rw h2,
+ 
+ rw foldl,
+ sorry
+end
