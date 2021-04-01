@@ -212,6 +212,23 @@ begin
  sorry
 end
 
+theorem rev_foldl_foldr2 {a : Type} (f : a → a → a) (xs : list a) : ∀ e : a, foldl f e xs = foldr (flip f) e (reverse xs) :=
+begin
+ induction xs with x xs hs,
+ intro e,
+ rw foldl,
+ rw reverse, 
+ rw foldr,
+
+ intro,
+
+ rw foldl, 
+ rw reverse,
+ rw foldr_open_tail,
+ rw flip_,
+ apply hs (f e x)
+end
+
 theorem foldeq {a : Type} (f g : a → a → a) (e : a) (xs : list a) : (∀ x y z, g (f x y) z = f x (g y z)) → (∀ x, g e x = f x e) → foldl g e xs = foldr f e xs :=
 begin 
  intro h1,
@@ -236,4 +253,52 @@ begin
  
  rw foldl,
  sorry
+end
+
+theorem foldeq2 {a : Type} (f g : a → a → a) (xs : list a) : (∀ x y z, g (f x y) z = f x (g y z)) → (∀ x e, g e x = f x e) → ∀ e, foldl g e xs = foldr f e xs :=
+begin 
+ intro h1,
+ intro h2,
+ induction xs with x xs hs,
+
+ intro,
+ unfold foldl,
+ unfold foldr,
+ 
+ unfold foldl,
+ specialize h2 x,
+ intro e,
+ rw h2,
+ rw foldr,
+ rw← hs,
+
+-- using the book:
+
+ induction xs with z zs hs2,
+ rw foldl,
+ rw foldl,
+ 
+ rw foldl,
+ rw h1,
+ rw foldl,
+
+ 
+end
+
+lemma foldeq2_aux {a : Type} (f g : a → a → a) (ys : list a) : ∀ y, 
+  (∀ (e : a), foldl g e (y :: ys) = foldr f e (y :: ys))
+    → (∀ (e : a), foldl g e ys = foldr f e ys) :=
+begin
+  intro y,
+  intro h,
+  induction ys with z zs hs,
+  unfold foldl,
+  unfold foldr,
+  intro e,
+  refl,
+  
+  unfold foldl at h,
+  unfold foldr at h,
+  
+  
 end
