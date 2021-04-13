@@ -68,6 +68,8 @@ end
 
 -- page 112
 
+section Fusion
+
 def reverse { a : Type } : list a -> list a
 | []      := []
 | (x::xs) := (reverse xs) ++ [x]
@@ -84,10 +86,64 @@ def foldl {a b: Type} : (b → a → b) → b → list a → b
 | f e [] := e
 | f e (x :: xs) := foldl f (f e x) xs
 
+def sum' : list ℕ → ℕ 
+ | []        := 0
+ | (x :: xs) := x + sum' xs 
 
+def concat {a : Type} : list (list a) → list a 
+ | []          := []
+ | (xs :: xss) := xs ++ concat xss 
+
+-- using foldr
+
+def sum'' : list ℕ → ℕ  := foldr (+) 0
+def map2 {a b :Type} (g : a → b) : list a → list b := foldr ((::) ∘ g) []
+
+-- tests
+
+#reduce concat [[1,2],[3,4],[5]]
+#reduce sum'' [0,1,2,3]
 #reduce foldr (λ x y, x + y) 0 [1,2,3]
 #reduce map (λ x : ℕ, x + 1) [1,2,3]
 #reduce reverse [1,2,3]
+
+
+theorem sum'_eq_sum'' {xs : list ℕ} : sum' xs = sum'' xs := sorry
+
+theorem sum_of_append {xs ys : list ℕ} : sum' (xs ++ ys) = sum' xs + sum' ys := sorry
+
+theorem concat_of_apend { a : Type} {xss yss : list (list a)} : 
+  concat (xss ++ yss) = concat xss ++ concat yss := sorry
+
+theorem foldr_law {a b : Type} (f : a → b → b) (g : b → b → b) (e : b) (xs ys : list a) 
+  (h1 : ∀ x, g e x = x) 
+  (h2 : ∀ x y z, f x (g y z) = g (f x y) z) : 
+  foldr f e (xs ++ ys) = g (foldr f e xs) (foldr f e ys) := sorry
+
+
+theorem funsion_law {a b : Type} (f : a → b) (g : b → a → a) (h : b → b → b) 
+  (xa : a) (xb : b)
+  (h1 : f xa = xb) 
+  (h2 : ∀ x y, f (g x y) = h x (f y)) : 
+  f ∘ foldr g xa = foldr h xb := 
+begin
+ funext xs,
+ induction xs with d hd, 
+ rw foldr, rw comp, dsimp, rw foldr, exact h1, 
+ sorry
+end
+
+
+lemma funsion1 {α β : Type} (a : α) 
+ (f :  β → α → α) (h : α → α → α) (g : α → β) 
+ (h1 : foldr f a [] = a)
+ (h2 : ∀ x y, foldr f a (((::) ∘ g) x y) = h x (foldr f a y))
+ : foldr f a ∘ map2 g = foldr h a := sorry
+
+
+end Fusion
+
+
 
 theorem map_distr_comp₁ (a b c : Type) (f : b → c) (g : a → b) (xs : list a) : 
  (map f ∘ map g) xs = map (f ∘ g) xs :=
@@ -110,8 +166,7 @@ begin
    rw ← xhi, },
 end
 
-#print list.cons_append
-
+-- #print list.cons_append
 
 -- Exercicio B
 
