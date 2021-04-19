@@ -90,8 +90,9 @@ begin
  rw list.cons_append,
 end
 
-theorem rev_rev_eq {a : Type} (xs : list a) : reverse (reverse xs) = xs :=
+theorem rev_rev_eq {a : Type} : ∀ xs : list a, reverse (reverse xs) = xs :=
 begin
+ intro xs,
  induction xs with b bs hi,
  simp [reverse,append],
  
@@ -99,6 +100,7 @@ begin
  rw rev_aux,
  rw hi,
 end
+
 
 theorem rev_rev_id {a : Type} : (reverse ∘ reverse) = (id : list a → list a) :=
 begin
@@ -270,6 +272,61 @@ def reverse₂ {a : Type} := foldl (flip (::)) ([] : list a)
 
 example : ∀ xs : list ℕ, reverse₁ xs = reverse₂ xs := sorry
 
-
 end Foldl
+
+
+namespace ExercicioF
+
+def foldl {a b: Type} : (b → a → b) → b → list a → b 
+ | f e [] := e
+ | f e (x :: xs) := foldl f (f e x) xs
+
+def foldr {a b: Type} : (a → b → b) → b → list a → b 
+| f e [] := e
+| f e (x :: xs) := f x (foldr f e xs)
+
+def flip {a b c : Type} : (a → b → c) → b → a → c 
+ | f x y := f y x
+
+def reverse₁ { a : Type } : list a -> list a
+| []      := []
+| (x::xs) := (reverse₁ xs) ++ [x]
+
+
+-- completar tipos e condicoes extras
+
+example : foldl f e xs = foldr (flip f) e (reverse₁ xs) := sorry
+
+end ExercicioF
+
+
+namespace mss
+
+-- completar definicoes e tentar provar teorema, lemas adicionais
+-- podem ser necessários.
+
+def max : ℕ → ℕ → ℕ 
+ | a b := if a >= b then a else b 
+
+def maximum {x : ℕ} {xs : list ℕ} : list ℕ → ℕ 
+ | []        := 0
+ | (x :: xs) := max x (maximum xs)
+
+def tails {a : Type} : list a → list (list a)
+ | []  := [[]]
+ | (x :: xs) := (x::xs) :: tails xs
+
+
+def segments {a : Type} : list a := concat ∘ map inits ∘ tails
+
+def mss₁ := maximum ∘ map sum ∘ segments
+
+
+def mss₂ := 
+  let f x y := max 0 (x + y) in maximum . scanr f 0 
+
+
+theorem mss_eq : mss₁ = mss₂ := sorry
+
+end mss
 
